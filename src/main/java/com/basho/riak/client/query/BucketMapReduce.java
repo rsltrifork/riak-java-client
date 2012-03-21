@@ -29,9 +29,15 @@ import com.basho.riak.client.util.UnmodifiableIterator;
 
 /**
  * Map/Reduce over a bucket, optionally add Key Filters to narrow the inputs.
+ *
+ * Be aware, that BucketMapReduce runs through all data in the bucket, before filters
+ * are applied. For for large datasets will mean bad performance. If you wish to do
+ * MapReduce over a limitied set of data in the bucket, then consider using BucketKeyMapReduce.
+ *
  * @author russell
  * 
  * @see IRiakClient#mapReduce(String)
+ * @see BucketKeyMapReduce
  */
 public class BucketMapReduce extends MapReduce implements Iterable<KeyFilter> {
 

@@ -412,7 +412,9 @@ provide to the getResult method:
 The inputs to a Map/Reduce are either a bucket, or bucket/key pairs.
 
 **** Bucket Map Reduce
-A BucketMapReduce extends MapReduce. To create a BucketMapReduce operation call
+A BucketMapReduce will run through all keys in the bucket.
+This will be time and resource consuming for large datasets.
+To create a BucketMapReduce operation call
 #+BEGIN_SRC java
     client.mapReduce("myBucket");
 #+END_SRC
