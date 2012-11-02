@@ -439,6 +439,8 @@ public class ClientHelper {
             }
 
             Map<String, String> queryParams = meta.getQueryParamMap();
+            if (meta.isStreamResponse())
+                queryParams.put("chunked", "true");
             if (!queryParams.isEmpty()) {
                 URI originalURI = httpMethod.getURI();
                 List<NameValuePair> currentQuery = URLEncodedUtils.parse(originalURI, CharsetUtils.UTF_8.name());
@@ -517,7 +519,7 @@ public class ClientHelper {
     }
 
     HttpResponse executeMethod(String bucket, String key, HttpRequestBase httpMethod, RequestMeta meta) {
-        return executeMethod(bucket, key, httpMethod, meta, false);
+        return executeMethod(bucket, key, httpMethod, meta, meta != null && meta.isStreamResponse());
     }
 
     private HttpRequestBase createStoreHttpMethod(String key, String url) {

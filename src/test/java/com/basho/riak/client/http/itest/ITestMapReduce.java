@@ -14,13 +14,20 @@
 package com.basho.riak.client.http.itest;
 
 import static com.basho.riak.client.http.Hosts.RIAK_URL;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import com.basho.riak.client.http.request.RequestMeta;
+import com.basho.riak.client.http.util.Multipart;
+import com.basho.riak.client.http.util.StreamedMultipart;
+import org.apache.http.Header;
+import org.apache.http.conn.EofSensorInputStream;
+import org.codehaus.jackson.map.util.ArrayBuilders;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.junit.AfterClass;
@@ -115,6 +122,29 @@ public class ITestMapReduce {
        assertEquals(0, results.getInt(0));
        assertEquals(73, results.getInt(73));
        assertEquals(197, results.getInt(197));       
+    }
+
+    @Test public void doJavascriptMapReduceWithStreamResponse() throws IOException, JSONException {
+        RiakClient c = new RiakClient(RIAK_URL);
+        MapReduceBuilder builder = new MapReduceBuilder(c);
+        builder.setBucket(BUCKET_NAME);
+        builder.map(JavascriptFunction.named("Riak.mapValuesJson"), false);
+        builder.reduce(JavascriptFunction.named("Riak.reduceNumericSort"), true);
+        RequestMeta requestMeta = new RequestMeta();
+        requestMeta.setStreamResponse(true);
+        MapReduceResponse response = builder.submit(requestMeta);
+        assertTrue(response.isSuccess());
+        assertNull(response.getBody());
+        EofSensorInputStream stream = (EofSensorInputStream) response.getStream();
+        assertNotNull(stream);
+
+        StreamedMultipart smp = response.getStreamedResults();
+
+        for (int i=0; i<200; i++){
+            assertTrue(smp.hasNext());
+            assertEquals("{\"phase\":1,\"data\":[" + i + "]}", smp.next().getBodyAsString());
+        }
+        assertFalse(smp.hasNext());
     }
 
     @Test public void doKeyFilterMapReduce() throws IOException, JSONException {

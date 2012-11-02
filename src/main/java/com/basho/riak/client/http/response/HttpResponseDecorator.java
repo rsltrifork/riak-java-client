@@ -13,10 +13,14 @@
  */
 package com.basho.riak.client.http.response;
 
+import java.io.EOFException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.basho.riak.client.http.util.StreamedMultipart;
+import org.apache.http.Header;
 import org.apache.http.client.methods.HttpRequestBase;
 
 
@@ -109,4 +113,12 @@ public class HttpResponseDecorator implements HttpResponse {
     public org.apache.http.HttpResponse getHttpResponse() {
         return impl.getHttpResponse();
     }
+
+    public StreamedMultipart getStreamedResults() throws IOException {
+        Map<String, String> headersForStreamedMultipart = new HashMap<String, String>();
+        Header contentTypeHeader = getHttpResponse().getFirstHeader("Content-type");
+        headersForStreamedMultipart.put(contentTypeHeader.getName().toLowerCase(), contentTypeHeader.getValue());
+        return new StreamedMultipart(headersForStreamedMultipart, getStream());
+    }
+
 }

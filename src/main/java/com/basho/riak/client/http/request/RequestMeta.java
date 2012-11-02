@@ -31,6 +31,7 @@ public class RequestMeta {
 
     private Map<String, String> queryParams = new LinkedHashMap<String, String>();
     private Map<String, String> headers = new HashMap<String, String>();
+    public boolean streamResponse = false;
 
     /**
      * Use the given r parameter for fetchMeta, fetch, or stream operations
@@ -280,5 +281,13 @@ public class RequestMeta {
 
     public RequestMeta setAccept(String contentTypes) {
         return setHeader(Constants.HDR_ACCEPT, contentTypes);
+    }
+
+    public boolean isStreamResponse() {
+        return streamResponse;
+    }
+
+    public void setStreamResponse(boolean streamResponse) {
+        this.streamResponse = streamResponse;
     }
 }
